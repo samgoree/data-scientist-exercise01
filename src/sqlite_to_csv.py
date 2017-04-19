@@ -1,14 +1,17 @@
 # sqlite_to_csv
 # Sam Goree
-# accepts the sqlite database from RTI CDS Analytics Exercise 01 
-# as command line argument writes to a csv file with the same name
-# upsettingly not solved for databases in general, but so it goes with sql
+# accepts the sqlite database from RTI CDS Analytics Exercise 01 as command line argument writes 
+# to a csv file with the same name upsettingly not done for databases in general, but so it goes with sql
 
 import sqlite3
 import sys
 
 conn = sqlite3.connect(sys.argv[1])
 c = conn.cursor()
+
+# this is not for general use, no need to use argparse or anything of that nature
+if len(sys.argv[1]) == 0 or sys.argv[1] == '-h':
+	print("Call with the path to exercise01.sqlite as the argument")
 
 f = open(sys.argv[1].split('.sqlite')[0] + '.csv', 'w')
 f2 = open(sys.argv[1].split('.sqlite')[0] + 'numerical.csv', 'w')
@@ -20,8 +23,7 @@ f2.write("age,workclass,education_level,education_num,marital_status,occupation,
 f2.write("1,0,0,0,0,0,0,0,0,1,1,1,0,0\n") # label for my use whether each category is nominal (0) or ordinal (1)
 
 
-# I'm having a busy week, I found a way to extract the table I want, so I'm going with it even if it looks ugly
-# I don't know sql well enough to do this sort of thing more elegantly
+# this is kind of ugly, refactor if possible. I don't know sql well enough to do this sort of thing more elegantly
 for row in c.execute(
 	"""SELECT records.age, workclasses.name, education_levels.name, 
 	records.education_num, marital_statuses.name, occupations.name, relationships.name,

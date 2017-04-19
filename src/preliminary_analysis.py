@@ -1,6 +1,7 @@
 # preliminary_analysis.py
 # takes a csv file as an argument and outputs a histogram or bar graph of each variable
-# conducts chi-square tests of independence between each pair of attributes (numerical attributes are split into quartiles)
+# conducts chi-square tests of independence between each pair of attributes 
+# (numerical attributes are split into quartiles)
 
 import sys
 
@@ -10,7 +11,7 @@ import matplotlib.pyplot
 import matplotlib.pyplot as plt
 matplotlib.rcParams.update({'font.size': 10})
 
-# makes a matplotlib histogram
+# makes a matplotlib histogram from a single numerical attribute
 def create_histogram(table_column, attribute_name):
 	plt.hist(table_column, 25)
 	plt.xlabel(attribute_name)
@@ -25,7 +26,7 @@ def autolabel(rects, ax):
 				'%d' % int(height),
 				ha='center', va='bottom')
 
-# makes a matplotlib barchart
+# makes a matplotlib barchart from a single nominal attribute
 def create_barchart(table_column, attribute_name):
 	frequencies = {}
 	for val in table_column:
@@ -42,6 +43,11 @@ def create_barchart(table_column, attribute_name):
 	ax.set_xticklabels(categories)
 	ax.set_title(attribute_name)
 
+# create a contingency table between two attributes
+# column1 and column2 are the data vectors
+# attribute1_ordinal and attribute2_ordinal are boolean values to indicate that the attributes are numerical
+# ncategories1 and ncategories2 is the number of partitions to make for numerical attributes
+# 		If the attributes are nominal, these can be none, default is 4 if numerical and unspecified
 def columns_to_contingency_table(column1, attribute1_ordinal, column2, 
 			attribute2_ordinal, ncategories1=None,ncategories2=None):
 	# calculate quartiles - this is inefficient (O(N) space), but takes more code to do well, refactor later
@@ -90,20 +96,32 @@ def columns_to_contingency_table(column1, attribute1_ordinal, column2,
 		table[valuedict1[val1],valuedict2[val2]] += 1
 	return table
 
-
-if __name__=='__main__':
-	# parse csv, this is a relatively small dataset so we don't have to worry about memory
-	f = open(sys.argv[1])
+# parse a csv file, f, into a numpy array
+# returns a numpy array of the data, two python lists of length shape[1] of the array with 
+# labels and ordinal or not booleans respectively
+def read_csv(f):
 	table_builder = []
 	for i,line in enumerate(f):
+		line = line.split(',\n')[0]
 		if i == 0:
 			labels = line.split(',')
 		elif i == 1:
-			ordinal = [int(i) for i in line.split(',')]
+			# the last element may be a newline
+			ordinal = [int(i) for i in line.split(',')] 
 		else:
-			table_builder.append(line.split(',')[:-1]) # the last element has a newline character after the last comma
+			table_builder.append(line.split(','))
 	# convert to a numpy array
-	table = np.array(table_builder)
+	return np.array(table_builder), labels, ordinal
+
+
+if __name__=='__main__':	
+	# this is not for general use, no need to use argparse or anything of that nature
+	if len(sys.argv[1]) == 0 or sys.argv[1] == '-h':
+		print("Call with the path to exercise01.sqlite as the argument")
+
+	# parse csv, this is a relatively small dataset so we don't have to worry about memory
+	f = open(sys.argv[1])
+	table,labels,ordinal = read_csv(f)
 	# make and display charts
 	for i,(l,o) in enumerate(zip(labels, ordinal)):
 		if o == 1:
@@ -113,7 +131,7 @@ if __name__=='__main__':
 			create_barchart(table[:,i], l)
 			plt.show()
 
-	#make an interesting graph
+	#make an interesting graph, as per the prompt
 	data = table[:,8].astype('object') + ',' + table[:,6].astype('object')
 	create_barchart(data, 'relationship vs. sex')
 	plt.show()

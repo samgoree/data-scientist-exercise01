@@ -1,21 +1,13 @@
 # feature_selection.py
-# takes a csv file of numerical attributes (exercise01numerical.csv included here)
-# and removes some features and modifies others
+# takes a csv file of numerical attributes (exercise01numerical.csv included here),
+# removes education_num, modifies capital gain, loss and country to boolean values
 
 import numpy as np
 import sys
+from preliminary_analysis import read_csv
 
 f = open(sys.argv[1])
-table_builder = []
-for i,line in enumerate(f):
-	if i == 0:
-		labels = line[:-1].split(',')
-	elif i == 1:
-		categorical = [int(val)==0 for val in line.split(',')]
-	else:
-		table_builder.append(line.split(',')[:-1]) # the last element has a newline character after the last comma
-# convert to a numpy array
-table = np.array(table_builder, dtype='int32')
+table,labels,ordinal = read_csv(f)
 
 for i,l in enumerate(labels):
 	# turn capital gain and loss into boolean values
@@ -30,6 +22,7 @@ for i,l in enumerate(labels):
 		del(labels[i])
 		del(categorical[i])
 
+# write a new file
 f_out = open(sys.argv[1].split('.csv')[0] + 'selected.csv', 'w')
 for label in labels:
 	f_out.write(label + ',')
