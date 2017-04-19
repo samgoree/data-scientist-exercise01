@@ -5,6 +5,7 @@ This repository contains my submission for Exercise 01 as part of my application
 My analysis report document was written in LaTeX and is in RTI_analysis.pdf, source is in RIT_analysis.tex.
 
 Update 4/19/17: Rearranging directory structure and cleaning up code for the sake of maintainability
+
  * source code is now in src folder
  * data and graphs (not pushed) have their own folders
  * moved csv parsing into a function and made sure it catches newline characters
